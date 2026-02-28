@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paul Tao</title>
+    <meta name="description" content="Paul Tao — Creative producer and strategist based in Los Angeles.">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:title" content="Paul Tao">
+    <meta property="og:description" content="Under construction in Los Angeles, CA">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://paultao.com">
+    <meta name="twitter:card" content="summary">
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><rect fill='%23fff' width='1' height='1'/></svg>">
+
+    <link rel="canonical" href="https://paultao.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
@@ -61,11 +75,20 @@
     <div class="container">
         <p class="status">Under construction in Los Angeles, CA</p>
         <div class="links">
-            <a href="mailto:paultao@gmail.com">Email</a>
+            <a href="#" id="email-link">Email</a>
             <a href="https://www.linkedin.com/in/paultao" target="_blank" rel="noopener">LinkedIn</a>
             <a href="https://www.instagram.com/paultao" target="_blank" rel="noopener">Instagram</a>
             <a href="https://inprogress.ing" target="_blank" rel="noopener">In Progress</a>
         </div>
     </div>
+    <script>
+        // Obfuscated email to prevent spam scraping
+        (function() {
+            var u = 'paultao';
+            var d = 'gmail.com';
+            var el = document.getElementById('email-link');
+            el.href = 'mai' + 'lto:' + u + '@' + d;
+        })();
+    </script>
 </body>
 </html>
