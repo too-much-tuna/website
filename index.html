@@ -6,17 +6,12 @@
     <title>Paul Tao</title>
     <meta name="description" content="Paul Tao — Creative producer and strategist based in Los Angeles.">
     <meta name="robots" content="index, follow">
-
-    <!-- Open Graph / Social -->
     <meta property="og:title" content="Paul Tao">
     <meta property="og:description" content="Under construction in Los Angeles, CA">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://paultao.com">
     <meta name="twitter:card" content="summary">
-
-    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><rect fill='%23fff' width='1' height='1'/></svg>">
-
     <link rel="canonical" href="https://paultao.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,12 +29,26 @@
             justify-content: center;
             padding: 2rem;
             -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
         }
 
         .container {
             text-align: center;
             opacity: 0;
             animation: fadeIn 0.8s ease-out 0.1s forwards;
+            position: relative;
+            z-index: 1;
+            pointer-events: none;
         }
 
         @keyframes fadeIn { to { opacity: 1; } }
@@ -57,6 +66,7 @@
             gap: 1.5rem;
             justify-content: center;
             flex-wrap: wrap;
+            pointer-events: auto;
         }
 
         .links a {
@@ -69,9 +79,20 @@
         }
 
         .links a:hover { color: #fff; }
+
+        .corner-flash {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+        }
     </style>
 </head>
 <body>
+    <canvas id="dvd"></canvas>
+    <div class="corner-flash" id="flash"></div>
     <div class="container">
         <p class="status">Under construction in Los Angeles, CA</p>
         <div class="links">
@@ -81,13 +102,217 @@
             <a href="https://inprogress.ing" target="_blank" rel="noopener">In Progress</a>
         </div>
     </div>
+
     <script>
-        // Obfuscated email to prevent spam scraping
+        // Obfuscated email
         (function() {
             var u = 'paultao';
             var d = 'gmail.com';
-            var el = document.getElementById('email-link');
-            el.href = 'mai' + 'lto:' + u + '@' + d;
+            document.getElementById('email-link').href = 'mai' + 'lto:' + u + '@' + d;
+        })();
+
+        // DVD bouncing logo
+        (function() {
+            var canvas = document.getElementById('dvd');
+            var ctx = canvas.getContext('2d');
+            var flash = document.getElementById('flash');
+            var dpr = window.devicePixelRatio || 1;
+
+            var W, H;
+            function resize() {
+                W = window.innerWidth;
+                H = window.innerHeight;
+                canvas.width = W * dpr;
+                canvas.height = H * dpr;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            // DVD logo dimensions
+            var logoW = 160;
+            var logoH = 80;
+
+            // State
+            var x = Math.random() * (W - logoW);
+            var y = Math.random() * (H - logoH);
+            var baseSpeed = 1.08; // 40% slower than 1.8
+            var vx = baseSpeed * (Math.random() > 0.5 ? 1 : -1);
+            var vy = baseSpeed * (Math.random() > 0.5 ? 1 : -1);
+            var friction = 0.995;
+            var maxSpeed = 6;
+
+            // Colors cycle
+            var colors = [
+                '#C4622D', '#4A90D9', '#D94A7A', '#50C878',
+                '#9B59B6', '#E6C84C', '#1ABC9C', '#E74C3C',
+                '#3498DB', '#F39C12'
+            ];
+            var colorIndex = 0;
+            var currentColor = colors[0];
+
+            // Mouse tracking
+            var mouseX = -1000, mouseY = -1000;
+            var prevMouseX = -1000, prevMouseY = -1000;
+            var mouseVelX = 0, mouseVelY = 0;
+            var wasOverLogo = false;
+
+            function updateMouse(cx, cy) {
+                mouseVelX = cx - prevMouseX;
+                mouseVelY = cy - prevMouseY;
+                prevMouseX = mouseX;
+                prevMouseY = mouseY;
+                mouseX = cx;
+                mouseY = cy;
+            }
+
+            window.addEventListener('mousemove', function(e) {
+                updateMouse(e.clientX, e.clientY);
+            });
+            window.addEventListener('touchmove', function(e) {
+                updateMouse(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: true });
+            window.addEventListener('mouseleave', function() {
+                mouseX = -1000;
+                mouseY = -1000;
+                wasOverLogo = false;
+            });
+
+            function isOverLogo(mx, my) {
+                return mx >= x && mx <= x + logoW && my >= y && my <= y + logoH;
+            }
+
+            // Corner flash
+            var flashTimer = null;
+            function triggerFlash(color) {
+                flash.style.background = 'radial-gradient(circle at center, ' + color + '22 0%, transparent 70%)';
+                flash.style.opacity = '1';
+                if (flashTimer) clearTimeout(flashTimer);
+                flashTimer = setTimeout(function() {
+                    flash.style.opacity = '0';
+                }, 400);
+            }
+
+            // Draw DVD logo
+            function drawLogo(x, y, color) {
+                ctx.save();
+                ctx.globalAlpha = 0.45;
+
+                // "DVD" text
+                ctx.fillStyle = color;
+                ctx.font = 'bold 48px DM Sans, Helvetica Neue, Helvetica, Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('DVD', x + logoW / 2, y + logoH / 2 - 6);
+
+                // Disc underline
+                ctx.beginPath();
+                ctx.ellipse(x + logoW / 2, y + logoH / 2 + 22, 36, 8, 0, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+
+                // Inner cutout
+                ctx.beginPath();
+                ctx.ellipse(x + logoW / 2, y + logoH / 2 + 22, 12, 3, 0, 0, Math.PI * 2);
+                ctx.fillStyle = '#000';
+                ctx.fill();
+
+                ctx.restore();
+            }
+
+            // Check corner hit
+            function checkCorner() {
+                var threshold = 5;
+                return (
+                    (x <= threshold && y <= threshold) ||
+                    (x + logoW >= W - threshold && y <= threshold) ||
+                    (x <= threshold && y + logoH >= H - threshold) ||
+                    (x + logoW >= W - threshold && y + logoH >= H - threshold)
+                );
+            }
+
+            // Animation
+            function animate() {
+                ctx.clearRect(0, 0, W, H);
+
+                // Check if cursor just entered the logo — push it
+                var overNow = isOverLogo(mouseX, mouseY);
+                if (overNow) {
+                    // Calculate push direction from cursor to logo center
+                    var logoCX = x + logoW / 2;
+                    var logoCY = y + logoH / 2;
+                    var pushDirX = logoCX - mouseX;
+                    var pushDirY = logoCY - mouseY;
+                    var pushDist = Math.sqrt(pushDirX * pushDirX + pushDirY * pushDirY) || 1;
+
+                    // Combine cursor velocity with push direction
+                    var cursorSpeed = Math.sqrt(mouseVelX * mouseVelX + mouseVelY * mouseVelY);
+                    var pushStrength = Math.min(cursorSpeed * 0.15, 2.5) + 0.3;
+
+                    vx += (pushDirX / pushDist) * pushStrength;
+                    vy += (pushDirY / pushDist) * pushStrength;
+
+                    // Also add some of the cursor's own velocity
+                    vx += mouseVelX * 0.08;
+                    vy += mouseVelY * 0.08;
+
+                    // Clamp
+                    var speed = Math.sqrt(vx * vx + vy * vy);
+                    if (speed > maxSpeed) {
+                        vx = (vx / speed) * maxSpeed;
+                        vy = (vy / speed) * maxSpeed;
+                    }
+                }
+                wasOverLogo = overNow;
+
+                // Apply friction to bring speed back toward base
+                var speed = Math.sqrt(vx * vx + vy * vy);
+                if (speed > baseSpeed) {
+                    vx *= friction;
+                    vy *= friction;
+                    speed = Math.sqrt(vx * vx + vy * vy);
+                    if (speed < baseSpeed + 0.05) {
+                        vx = (vx / speed) * baseSpeed;
+                        vy = (vy / speed) * baseSpeed;
+                    }
+                }
+
+                x += vx;
+                y += vy;
+
+                // Bounce off walls
+                var bounced = false;
+                if (x <= 0) {
+                    x = 0;
+                    vx = Math.abs(vx);
+                    bounced = true;
+                } else if (x + logoW >= W) {
+                    x = W - logoW;
+                    vx = -Math.abs(vx);
+                    bounced = true;
+                }
+                if (y <= 0) {
+                    y = 0;
+                    vy = Math.abs(vy);
+                    bounced = true;
+                } else if (y + logoH >= H) {
+                    y = H - logoH;
+                    vy = -Math.abs(vy);
+                    bounced = true;
+                }
+
+                if (bounced) {
+                    colorIndex = (colorIndex + 1) % colors.length;
+                    currentColor = colors[colorIndex];
+                    if (checkCorner()) {
+                        triggerFlash(currentColor);
+                    }
+                }
+
+                drawLogo(x, y, currentColor);
+                requestAnimationFrame(animate);
+            }
+            animate();
         })();
     </script>
 </body>
